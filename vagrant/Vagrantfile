@@ -1,0 +1,43 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+Vagrant.require_version ">=2.3.7"
+
+# Tells us if the host system is an Apple Silicon Mac running Rosetta
+def is_arm64()
+  `uname -m` == "arm64" || `/usr/bin/arch -64 sh -c "sysctl -in sysctl.proc_translated"`.strip() == "0"
+end
+
+# All Vagrant configuration is done below. The "2" in Vagrant.configure
+# configures the configuration version (we support older styles for
+# backwards compatibility). Please don't change it unless you know what
+# you're doing.
+Vagrant.configure("2") do |config|
+
+  config.vm.define "test-node", primary: true do |testnode|
+
+    testnode.vm.hostname = "test-node"
+
+    if is_arm64() #For mac m2
+      testnode.vm.box = 'gyptazy/ubuntu22.04-arm64'
+      testnode.vm.provider "vmware_desktop" do |v, override|
+        v.ssh_info_public = true
+        v.vmx["memsize"] = "1024"
+        v.vmx["numvcpus"] = "2"
+      end
+    else
+      testnode.vm.box = "generic/ubuntu2204"
+      testnode.vm.provider "hyperv" do |v,override|
+        v.maxmemory = 4096
+        v.memory = 512
+        v.cpus = 2
+      end
+    end
+
+    config.vm.provision "ansible" do |ansible|
+      ansible.verbose = "v"
+      ansible.config_file = "../ansible/ansible.cfg"
+      ansible.playbook = "../ansible/playbooks/base.yml"
+    end
+
+  end
+end

@@ -1,0 +1,7 @@
+- name: Bootstrap a vanilla Ubuntu on Vagrant
+  hosts: all
+  become: yes
+  tasks:
+    - name: Start up
+      import_role:
+        name: base
