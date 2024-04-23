@@ -1,0 +1,7 @@
+- name: Add docker engine to the VM
+  hosts: all
+  become: yes
+  tasks:
+    - name: Add docker engine
+      import_role:
+        name: docker

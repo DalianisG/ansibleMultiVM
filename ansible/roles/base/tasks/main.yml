@@ -1,11 +1,2 @@
-- name: Get uptime
-  shell: uptime
-  register: result
 - name: Set vi as default editor
   command: update-alternatives --set editor /usr/bin/vim.basic
-
-- debug:
-    var: result.stdout
-
-
-

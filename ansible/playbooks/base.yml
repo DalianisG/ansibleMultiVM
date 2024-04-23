@@ -2,6 +2,6 @@
   hosts: all
   become: yes
   tasks:
-    - name: Start up
+    - name: Start up the vm and set vim as default editor
       import_role:
         name: base

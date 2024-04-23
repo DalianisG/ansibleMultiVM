@@ -1,0 +1,20 @@
+- name: Add Docker GPG apt Key
+  apt_key:
+    url: https://download.docker.com/linux/ubuntu/gpg
+    state: present
+- name: Add Docker Repository
+  apt_repository:
+    repo: deb https://download.docker.com/linux/ubuntu jammy stable
+    state: present
+- name: Installing docker-ce packages
+  apt:
+    name: ["docker-ce", "docker-compose-plugin", "docker-buildx-plugin"]
+    state: latest
+    install_recommends: no
+    update_cache: yes
+- name: Add vagrant user to docker group
+  become: true
+  user:
+    name: vagrant
+    groups: docker
+    append: yes
