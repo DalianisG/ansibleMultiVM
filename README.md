@@ -52,6 +52,24 @@ cd ansible
 ansible-playbook playbooks/docker.yml
 ```
 
+### Install nginx on VM and deploy a simple HTML page with VM name
+
+To install nginx on the VMs, run:
+
+``` bash
+cd ansible
+ansible-playbook playbooks/nginx.yml
+```
+
+After that, you can access the web pages served by Nginx for each VM. Navigate to the following URLs in your web browser to view the unique messages for each VM:
+
+- **VM1:** [http://localhost:60081/](http://localhost:60081/)
+- **VM2:** [http://localhost:60082/](http://localhost:60082/)
+- **VM3:** [http://localhost:60083/](http://localhost:60083/)
+- **VM4:** [http://localhost:60084/](http://localhost:60084/)
+
+Each page will display a unique message indicating the VM it was served from. For example, you will see a message such as "Welcome from vm1 deployed with Vagrant" for VM1.
+
 ## Troubleshooting
 
 ### Known Issues
