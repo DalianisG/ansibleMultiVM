@@ -1,7 +1,7 @@
-- name: Bootstrap a vanilla Ubuntu on Vagrant
+- name: Set vim as default editor
   hosts: all
   become: yes
   tasks:
-    - name: Start up the vm and set vim as default editor
+    - name: Set vim as default editor
       import_role:
         name: base

@@ -1,0 +1,5 @@
+- name: Restart Nginx to apply new configuration
+  ansible.builtin.service:
+    name: nginx
+    state: restarted
+  tags: nginx

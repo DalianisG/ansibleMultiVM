@@ -1,0 +1,7 @@
+- name: Add nginx
+  hosts: all
+  become: yes
+  tasks:
+    - name: Add nginx
+      import_role:
+        name: nginx

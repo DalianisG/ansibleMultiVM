@@ -1,2 +1,15 @@
+# This Ansible role performs the following tasks:
+# 1. Retrieves the system uptime.
+# 2. Sets 'vi' as the default system editor.
+# 3. Outputs the result of the uptime command for debugging purposes.
+
+- name: Get uptime
+  shell: uptime
+  register: result
+
 - name: Set vi as default editor
   command: update-alternatives --set editor /usr/bin/vim.basic
+
+- name: Show the uptime result
+  debug:
+    var: result.stdout

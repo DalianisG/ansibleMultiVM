@@ -1,47 +1,64 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
+# Specify the minimum Vagrant version required for this Vagrantfile
 Vagrant.require_version ">=2.3.7"
 
-# Tells us if the host system is an Apple Silicon Mac.
+# Function to detect if the host system is an Apple Silicon Mac (ARM64 architecture)
 def is_arm64()
+  # Check if the machine architecture is ARM64 or if it's running under Rosetta
   `uname -m` == "arm64" || `/usr/bin/arch -64 sh -c "sysctl -in sysctl.proc_translated"`.strip() == "0"
 end
 
-# All Vagrant configuration is done below. The "2" in Vagrant.configure
-# configures the configuration version (we support older styles for
-# backwards compatibility).
+# Vagrant configuration block
 Vagrant.configure("2") do |config|
 
-  #Create a VM with name "test-node"
-  config.vm.define "test-node", primary: true do |testnode|
+  # Define an array of VM names to be created
+  vm_names = ["vm1", "vm2", "vm3", "vm4"]
+  
+  # Loop through each VM name to configure the VMs
+  vm_names.each do |vm_name|
+    config.vm.define vm_name do |node|
+      
+      # Set the hostname for the VM
+      node.vm.hostname = vm_name
 
-    testnode.vm.hostname = "test-node"
-
-    #For mac with m chip, we cannot user hyperv, using VMware instead
-    if is_arm64() #For mac m1/m2/m3
-      testnode.vm.box = 'gyptazy/ubuntu22.04-arm64'
-      testnode.vm.provider "vmware_desktop" do |v, override|
-        v.allowlist_verified = true
-        v.ssh_info_public = true
-        v.vmx["ethernet0.pcislotnumber"] = "160"
-        v.vmx["memsize"] = "1024"
-        v.vmx["numvcpus"] = "2"
+      # Conditional configuration based on the architecture of the host machine
+      if is_arm64()         # If the host is ARM64, 
+        node.vm.box = 'bento/ubuntu-22.04-arm64'
+        node.vm.provider "vmware_desktop" do |v, override|
+          v.ssh_info_public = true  # Enable SSH info to be public
+          v.vmx["memsize"] = "1024" # Allocate 1024 MB of RAM to the VM
+          v.vmx["numvcpus"] = "2"   # Allocate 2 CPUs to the VM
+          v.vmx["ethernet0.virtualdev"] = "vmxnet3"
+        end
+      else
+        node.vm.box = "generic/ubuntu2204"
+        node.vm.provider "hyperv" do |v, override|
+          v.maxmemory = 4096 # Set the maximum memory for the VM to 4096 MB
+          v.memory = 512     # Allocate 512 MB of RAM to the VM
+          v.cpus = 2         # Allocate 2 CPUs to the VM
+        end
       end
-    else
-      testnode.vm.box = "generic/ubuntu2204"
-      testnode.vm.provider "hyperv" do |v,override|
-        v.maxmemory = 4096
-        v.memory = 512
-        v.cpus = 2
-      end
-    end
 
-    #Setting up a base playbook to run on start up
-    config.vm.provision "ansible" do |ansible|
-      ansible.verbose = "v"
-      ansible.config_file = "../ansible/ansible.cfg"
-      ansible.playbook = "../ansible/playbooks/base.yml"
-    end
+      # Forward port 9100 in the guest to a unique port on the host for each VM
+      node.vm.network "forwarded_port", guest: 9100, host: 60001 + vm_names.index(vm_name), auto_correct: true
+      # Forward port 80 in the guest to a unique port on the host for each VM
+      node.vm.network "forwarded_port", guest: 80, host: 60081 + vm_names.index(vm_name), auto_correct: true
+      # Disable forwarding port 22 in the guest to port 2222 of the host
+      node.vm.network "forwarded_port", guest: 22, host: 2222, id: "ssh", disabled: true
+      # Forward port 22 in the guest to a unique port on the host for each VM
+      node.vm.network "forwarded_port", guest: 22, host: 60023 + vm_names.index(vm_name), auto_correct: true
 
+      
+      node.vm.boot_timeout = 600 # Increase boot timeout to 600 seconds (10 minutes)
+      # Provision the VM using Ansible with the specified configuration and playbook
+      node.vm.provision "ansible" do |ansible|
+        ansible.compatibility_mode = "2.0"                  # Set Ansible compatibility mode to version 2.0
+        ansible.verbose = "v"                               # Enable verbose mode for Ansible output
+        ansible.config_file = "../ansible/ansible.cfg"      # Path to Ansible configuration file
+        ansible.playbook = "../ansible/playbooks/base.yml"  # Path to the Ansible playbook
+        end
+
+    end
   end
 end

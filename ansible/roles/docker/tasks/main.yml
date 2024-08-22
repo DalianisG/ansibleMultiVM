@@ -1,20 +1,25 @@
-- name: Add Docker GPG apt Key
-  apt_key:
+# This Ansible role installs Docker on an Ubuntu system and configures the 'vagrant' user to use Docker.
+
+- name: Add Docker GPG apt Key to the system's list of trusted APT keys
+  ansible.builtin.apt_key:
     url: https://download.docker.com/linux/ubuntu/gpg
     state: present
+
 - name: Add Docker Repository
-  apt_repository:
+  ansible.builtin.apt_repository: #
     repo: deb https://download.docker.com/linux/ubuntu jammy stable
     state: present
+
 - name: Installing docker-ce packages
-  apt:
+  ansible.builtin.apt:
     name: ["docker-ce", "docker-compose-plugin", "docker-buildx-plugin"]
     state: latest
     install_recommends: no
     update_cache: yes
+
 - name: Add vagrant user to docker group
   become: true
-  user:
+  ansible.builtin.user:
     name: vagrant
     groups: docker
     append: yes
