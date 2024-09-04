@@ -1,4 +1,4 @@
-# Vagrant Project with Ansible
+# AnsibleMultiVM: Automated Multi-VM Setup with Ansible and Vagrant
 
 This repository contains a simple example of a multi-VM setup using Vagrant and Ansible. The project creates four virtual machines (VMs) via Vagrant, which are provisioned using Ansible. On startup, a base role sets `vim` as the default editor. You can also install Docker Engine on the VMs while they are running using Ansible.
 
